@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seterra Eredmény Ellenőrző</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        .offline-badge {
+            display: inline-block;
+            background: #48bb78;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-clear {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #c53030;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        #results {
+            margin-top: 40px;
+            display: none;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .results-header h2 {
+            color: #2d3748;
+            font-size: 2em;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 1.05em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: #f7fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .matched {
+            color: #38a169;
+            font-weight: 500;
+        }
+
+        .duplicate {
+            color: #dd6b20;
+            font-weight: 500;
+        }
+
+        .warning {
+            background: #fef5e7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-title {
+            font-weight: 600;
+            color: #d68910;
+            margin-bottom: 5px;
+        }
+
+        .info {
+            background: #ebf8ff;
+            border-left: 4px solid #3182ce;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            color: #2c5282;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loader.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Seterra Eredmény Ellenőrző <span class="offline-badge">📡 OFFLINE</span></h1>
+        <p class="subtitle">Seterra feladatok automatikus kiértékelése - Teljes offline működés</p>
+
+        <div class="input-section">
+            <div class="input-group">
+                <label for="originalList">📋 Eredeti névsor (enterekkel elválasztva):</label>
+                <textarea id="originalList" placeholder="Másold be ide az eredeti osztálynévsort...
+(Minden név külön sorba)"></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="taskList1">📝 1. feladatlista (Seterra eredmény):</label>
+                <textarea id="taskList1" placeholder="Másold be ide az 1. Seterra feladat eredményeit...
+(Formátum: sorszám.Név100%idődátum)"></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="taskList2">📝 2. feladatlista (opcionális):</label>
+                <textarea id="taskList2" placeholder="Hagyd üresen, ha nincs második lista..."></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="taskList3">📝 3. feladatlista (opcionális):</label>
+                <textarea id="taskList3" placeholder="Hagyd üresen, ha nincs harmadik lista..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="processData()">✨ Táblázat készítése</button>
+                <button class="btn-clear" onclick="clearAll()">🗑️ Törlés</button>
+            </div>
+        </div>
+
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #718096;">Feldolgozás folyamatban...</p>
+        </div>
+
+        <div id="results">
+            <div class="results-header">
+                <h2>📊 Eredmény</h2>
+                <div class="export-buttons">
+                    <button class="btn-secondary" onclick="exportToExcel()">📥 Excel (CSV) letöltése</button>
+                </div>
+            </div>
+            
+            <div id="statsContainer"></div>
+            <div id="warningsContainer"></div>
+            <div id="tableContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        // Levenshtein távolság számítás
+        function levenshteinDistance(str1, str2) {
+            const matrix = [];
+            
+            for (let i = 0; i <= str2.length; i++) {
+                matrix[i] = [i];
+            }
+            
+            for (let j = 0; j <= str1.length; j++) {
+                matrix[0][j] = j;
+            }
+            
+            for (let i = 1; i <= str2.length; i++) {
+                for (let j = 1; j <= str1.length; j++) {
+                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            
+            return matrix[str2.length][str1.length];
+        }
+
+        // Normalizált név (ékezetek nélkül, kisbetűvel, szóközök nélkül)
+        function normalizeString(str) {
+            return str
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]/g, '');
+        }
+
+        // Név tokenizálás (szavakra bontás)
+        function tokenize(name) {
+            return name
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .split(/[^a-z0-9]+/)
+                .filter(t => t.length > 0);
+        }
+
+        // Fuzzy név párosítás
+        function matchName(originalName, taskName) {
+            // Normalizált teljes név
+            const normOriginal = normalizeString(originalName);
+            const normTask = normalizeString(taskName);
+            
+            // Tökéletes egyezés
+            if (normOriginal === normTask) {
+                return { score: 100, match: true };
+            }
+            
+            // Token-alapú egyezés
+            const origTokens = tokenize(originalName);
+            const taskTokens = tokenize(taskName);
+            
+            // Ha minden task token megtalálható az eredeti nevében
+            const allTaskTokensInOriginal = taskTokens.every(tt => 
+                origTokens.some(ot => ot.includes(tt) || tt.includes(ot))
+            );
+            
+            if (allTaskTokensInOriginal) {
+                return { score: 90, match: true };
+            }
+            
+            // Részleges egyezések számítása
+            let matchingTokens = 0;
+            taskTokens.forEach(tt => {
+                if (origTokens.some(ot => {
+                    const maxLen = Math.max(ot.length, tt.length);
+                    const distance = levenshteinDistance(ot, tt);
+                    return distance <= maxLen * 0.2;
+                })) {
+                    matchingTokens++;
+                }
+            });
+            
+            if (matchingTokens >= taskTokens.length * 0.6) {
+                return { score: 70 + (matchingTokens / taskTokens.length) * 20, match: true };
+            }
+            
+            // Levenshtein távolság alapú egyezés
+            const maxLen = Math.max(normOriginal.length, normTask.length);
+            const distance = levenshteinDistance(normOriginal, normTask);
+            const similarity = (1 - distance / maxLen) * 100;
+            
+            if (similarity > 70) {
+                return { score: similarity, match: true };
+            }
+            
+            return { score: similarity, match: false };
+        }
+
+        // Seterra sor feldolgozása
+        function parseTaskLine(line) {
+            // Format: sorszám.Név100%idődátum
+            const match = line.match(/^(\d+)\.(.*?)(\d+%)/);
+            if (match) {
+                return match[2].trim();
+            }
+            return null;
+        }
+
+        // Névsor feldolgozása
+        function parseNameList(text) {
+            return text
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+        }
+
+        // Feladatlista feldolgozása
+        function parseTaskList(text) {
+            const lines = text.split('\n').filter(line => line.trim().length > 0);
+            const names = [];
+            
+            for (const line of lines) {
+                const name = parseTaskLine(line);
+                if (name) {
+                    names.push(name);
+                }
+            }
+            
+            return names;
+        }
+
+        // Adatok feldolgozása
+        function processData() {
+            const originalText = document.getElementById('originalList').value.trim();
+            const task1Text = document.getElementById('taskList1').value.trim();
+            const task2Text = document.getElementById('taskList2').value.trim();
+            const task3Text = document.getElementById('taskList3').value.trim();
+            
+            if (!originalText || !task1Text) {
+                alert('⚠️ Kérlek töltsd ki az eredeti névsort és legalább az 1. feladatlistát!');
+                return;
+            }
+            
+            // Loader megjelenítése
+            document.getElementById('loader').classList.add('active');
+            document.getElementById('results').style.display = 'none';
+            
+            // Rövid késleltetés a vizuális visszajelzéshez
+            setTimeout(() => {
+                try {
+                    const originalNames = parseNameList(originalText);
+                    const taskLists = [];
+                    
+                    if (task1Text) taskLists.push(parseTaskList(task1Text));
+                    if (task2Text) taskLists.push(parseTaskList(task2Text));
+                    if (task3Text) taskLists.push(parseTaskList(task3Text));
+                    
+                    const results = buildResultTable(originalNames, taskLists);
+                    displayResults(results, originalNames, taskLists);
+                } catch (error) {
+                    alert('❌ Hiba történt a feldolgozás során: ' + error.message);
+                    console.error(error);
+                } finally {
+                    document.getElementById('loader').classList.remove('active');
+                }
+            }, 300);
+        }
+
+        // Eredmény táblázat építése
+        function buildResultTable(originalNames, taskLists) {
+            const results = [];
+            const warnings = [];
+            
+            // Duplikált eredeti nevek keresése
+            const nameCounts = {};
+            originalNames.forEach(name => {
+                nameCounts[name] = (nameCounts[name] || 0) + 1;
+            });
+            
+            const duplicateNames = Object.keys(nameCounts).filter(name => nameCounts[name] > 1);
+            if (duplicateNames.length > 0) {
+                warnings.push({
+                    type: 'duplicate',
+                    message: `Az eredeti névsorban ${duplicateNames.length} név többször szerepel: ${duplicateNames.join(', ')}`
+                });
+            }
+            
+            for (const originalName of originalNames) {
+                const row = { original: originalName, tasks: [] };
+                
+                for (let listIndex = 0; listIndex < taskLists.length; listIndex++) {
+                    const taskList = taskLists[listIndex];
+                    const matches = [];
+                    
+                    // Minden task névvel összehasonlítás
+                    for (const taskName of taskList) {
+                        const matchResult = matchName(originalName, taskName);
+                        if (matchResult.match) {
+                            matches.push({ name: taskName, score: matchResult.score });
+                        }
+                    }
+                    
+                    // Legjobb egyezés kiválasztása
+                    if (matches.length > 0) {
+                        matches.sort((a, b) => b.score - a.score);
+                        const bestMatch = matches[0];
+                        
+                        // Duplikációk számolása
+                        const count = taskList.filter(n => n === bestMatch.name).length;
+                        
+                        if (count > 1) {
+                            row.tasks.push(`${bestMatch.name} ${count}x`);
+                        } else {
+                            row.tasks.push(bestMatch.name);
+                        }
+                    } else {
+                        row.tasks.push('');
+                    }
+                }
+                
+                results.push(row);
+            }
+            
+            return { results, warnings };
+        }
+
+        // Eredmények megjelenítése
+        function displayResults(data, originalNames, taskLists) {
+            const { results, warnings } = data;
+            
+            // Statisztikák
+            const stats = calculateStats(results, taskLists.length);
+            displayStats(stats);
+            
+            // Figyelmeztetések
+            if (warnings.length > 0) {
+                displayWarnings(warnings);
+            }
+            
+            // Táblázat
+            let html = '<table><thead><tr>';
+            html += '<th>Névsor</th>';
+            for (let i = 0; i < taskLists.length; i++) {
+                html += `<th>${i + 1}. lista</th>`;
+            }
+            html += '</tr></thead><tbody>';
+            
+            for (const row of results) {
+                html += '<tr>';
+                html += `<td><strong>${row.original}</strong></td>`;
+                for (const task of row.tasks) {
+                    if (task === '') {
+                        html += '<td style="color: #cbd5e0;">—</td>';
+                    } else if (task.includes('x')) {
+                        html += `<td class="duplicate">${task}</td>`;
+                    } else {
+                        html += `<td class="matched">${task}</td>`;
+                    }
+                }
+                html += '</tr>';
+            }
+            
+            html += '</tbody></table>';
+            
+            document.getElementById('tableContainer').innerHTML = html;
+            document.getElementById('results').style.display = 'block';
+            
+            // Smooth scroll az eredményekhez
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Statisztikák számítása
+        function calculateStats(results, listCount) {
+            const stats = {
+                totalStudents: results.length,
+                completions: []
+            };
+            
+            for (let i = 0; i < listCount; i++) {
+                const completed = results.filter(r => r.tasks[i] !== '').length;
+                stats.completions.push({
+                    list: i + 1,
+                    count: completed,
+                    percentage: Math.round((completed / results.length) * 100)
+                });
+            }
+            
+            return stats;
+        }
+
+        // Statisztikák megjelenítése
+        function displayStats(stats) {
+            let html = '<div class="stats">';
+            html += `<div class="stat-card">
+                <div class="stat-number">${stats.totalStudents}</div>
+                <div class="stat-label">Összes tanuló</div>
+            </div>`;
+            
+            for (const comp of stats.completions) {
+                html += `<div class="stat-card">
+                    <div class="stat-number">${comp.count}</div>
+                    <div class="stat-label">${comp.list}. lista - ${comp.percentage}% teljesítette</div>
+                </div>`;
+            }
+            
+            html += '</div>';
+            document.getElementById('statsContainer').innerHTML = html;
+        }
+
+        // Figyelmeztetések megjelenítése
+        function displayWarnings(warnings) {
+            let html = '';
+            for (const warning of warnings) {
+                html += `<div class="warning">
+                    <div class="warning-title">⚠️ Figyelmeztetés</div>
+                    <div>${warning.message}</div>
+                </div>`;
+            }
+            document.getElementById('warningsContainer').innerHTML = html;
+        }
+
+        // CSV/Excel export - 100% natív JavaScript
+        function exportToExcel() {
+            const originalText = document.getElementById('originalList').value.trim();
+            const task1Text = document.getElementById('taskList1').value.trim();
+            const task2Text = document.getElementById('taskList2').value.trim();
+            const task3Text = document.getElementById('taskList3').value.trim();
+            
+            const originalNames = parseNameList(originalText);
+            const taskLists = [];
+            
+            if (task1Text) taskLists.push(parseTaskList(task1Text));
+            if (task2Text) taskLists.push(parseTaskList(task2Text));
+            if (task3Text) taskLists.push(parseTaskList(task3Text));
+            
+            const { results } = buildResultTable(originalNames, taskLists);
+            
+            // CSV fejléc
+            let csvContent = 'Névsor';
+            for (let i = 0; i < taskLists.length; i++) {
+                csvContent += `,${i + 1}. lista`;
+            }
+            csvContent += '\n';
+            
+            // CSV sorok
+            for (const row of results) {
+                // Név escape-elése (ha vesszőt vagy idézőjelet tartalmaz)
+                let escapedName = row.original;
+                if (escapedName.includes(',') || escapedName.includes('"') || escapedName.includes('\n')) {
+                    escapedName = '"' + escapedName.replace(/"/g, '""') + '"';
+                }
+                csvContent += escapedName;
+                
+                for (const task of row.tasks) {
+                    let escapedTask = task;
+                    if (escapedTask.includes(',') || escapedTask.includes('"') || escapedTask.includes('\n')) {
+                        escapedTask = '"' + escapedTask.replace(/"/g, '""') + '"';
+                    }
+                    csvContent += ',' + (escapedTask === '' ? '' : escapedTask);
+                }
+                csvContent += '\n';
+            }
+            
+            // UTF-8 BOM hozzáadása a magyar karakterekhez
+            const BOM = '\uFEFF';
+            const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+            
+            // Letöltés
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const date = new Date().toISOString().split('T')[0];
+            link.setAttribute('href', url);
+            link.setAttribute('download', `seterra_eredmenyek_${date}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Összes törlése
+        function clearAll() {
+            if (confirm('Biztosan törölni szeretnéd az összes adatot?')) {
+                document.getElementById('originalList').value = '';
+                document.getElementById('taskList1').value = '';
+                document.getElementById('taskList2').value = '';
+                document.getElementById('taskList3').value = '';
+                document.getElementById('results').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
