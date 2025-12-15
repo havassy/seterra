@@ -1,6 +1,6 @@
 # Seterra Eredmény Ellenőrző
-# A példákban megjelenő nevek generált nevek.
-# Az alábbi leírást MI generálta
+A példákban megjelenő nevek generált nevek.
+Az alábbi leírást MI generálta
 
 ## 📋 Miről szól ez a program?
 
