@@ -285,8 +285,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎯 Seterra Eredmény Ellenőrző <span class="offline-badge">📡 OFFLINE v7</span></h1>
-        <p class="subtitle">Seterra feladatok automatikus kiértékelése - Szigorú párosítás, vesszős nevek detektálása</p>
+        <h1>🎯 Seterra Eredmény Ellenőrző <span class="offline-badge">v8</span></h1>
+        <p class="subtitle">Seterra feladatok automatikus kiértékelése - Fordított nevek felismerése + XLSX/CSV export</p>
 
         <div class="input-section">
             <div class="input-group">
@@ -459,7 +459,7 @@
             return similarity;
         }
 
-        // Név párosítás - V7 VÉGLEGES: 85% teljes egyezés + vesszős név detektálás
+        // Név párosítás - V8: 85% teljes egyezés + vesszős név + FORDÍTOTT NÉV felismerés
         function matchName(originalName, taskName) {
             // KRITIKUS: Vesszős nevek kiszűrése
             if (taskName.includes(',')) {
@@ -498,6 +498,38 @@
                 const lastNameScore = tokenSimilarity(origLastName, taskInfo.lastName);
                 
                 if (lastNameScore < 88) {
+                    // ÚJ: FORDÍTOTT NÉV PRÓBA!
+                    // Ha vezetéknév nem egyezik, lehet hogy fordítva írták be
+                    // Eredeti: [Vezetéknév] [Keresztnév] (magyar)
+                    // Seterra: [Keresztnév] [Vezetéknév] (nemzetközi)
+                    
+                    // Próbáljuk fordítva: taskInfo.lastName legyen az eredeti keresztnév
+                    let reversedMatch = false;
+                    for (let i = 1; i < origTokens.length; i++) {
+                        const origFirst = origTokens[i];
+                        const reverseLastScore = tokenSimilarity(origFirst, taskInfo.lastName);
+                        
+                        if (reverseLastScore >= 88) {
+                            // A Seterra "vezetéknév" egyezik egy eredeti keresztnévvel!
+                            // Most nézzük meg, hogy a Seterra "keresztnév" egyezik-e az eredeti vezetéknévvel
+                            
+                            for (const taskFirst of taskInfo.firstNames) {
+                                const reverseFirstScore = tokenSimilarity(origLastName, taskFirst);
+                                
+                                if (reverseFirstScore >= 88) {
+                                    // FORDÍTOTT NÉV TALÁLAT!
+                                    reversedMatch = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (reversedMatch) {
+                                return { score: 85, match: true }; // Alacsonyabb score, mert fordított
+                            }
+                        }
+                    }
+                    
+                    // Ha fordítva sem egyezik, nincs match
                     return { score: 0, match: false };
                 }
                 
