@@ -285,8 +285,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎯 Seterra Eredmény Ellenőrző <span class="offline-badge">v8</span></h1>
-        <p class="subtitle">Seterra feladatok automatikus kiértékelése - Fordított nevek felismerése + XLSX/CSV export</p>
+        <h1>🎯 Seterra Eredmény Ellenőrző <span class="offline-badge">v9</span></h1>
+        <p class="subtitle">Seterra feladatok automatikus kiértékelése - Egybeírt nevek + false positive javítás</p>
 
         <div class="input-section">
             <div class="input-group">
@@ -437,19 +437,13 @@
             };
         }
 
-        // Token hasonlóság számítás - JAVÍTOTT
+        // Token hasonlóság számítás - V9 JAVÍTOTT: substring matching eltávolítva
         function tokenSimilarity(token1, token2) {
             const norm1 = normalizeString(token1);
             const norm2 = normalizeString(token2);
             
             // Tökéletes egyezés
             if (norm1 === norm2) return 100;
-            
-            // Substring matching csak ha az egyik token elég hosszú (>6 karakter)
-            // Így elkerüljük a téves egyezéseket
-            if (norm1.length > 6 && norm2.length > 6) {
-                if (norm1.includes(norm2) || norm2.includes(norm1)) return 90;
-            }
             
             // Levenshtein távolság alapú hasonlóság
             const maxLen = Math.max(norm1.length, norm2.length);
