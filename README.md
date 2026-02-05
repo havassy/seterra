@@ -167,5 +167,5 @@ Ha hibát találsz vagy új funkciót javasolnál, írj e-mailt: havassy@budai-r
 ---
 
 Készítette: Havassy András (földrajz tanár)
-Verzió: 1.0
-Utolsó frissítés: 2025. december
+Verzió: 9
+Utolsó frissítés: 2026. február
