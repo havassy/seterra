@@ -1,6 +1,5 @@
 # Seterra Eredmény Ellenőrző
-A példákban megjelenő nevek generált nevek.
-Az alábbi leírást MI generálta
+Az útmutató kizárólag semleges névhelyettesítőket használ.
 
 ## 📋 Miről szól ez a program?
 
@@ -9,9 +8,9 @@ Ez egy **offline, webes alkalmazás** pedagógusok számára, amely automatikusa
 ## 🎯 Mi a célja?
 
 A Seterra játékban a diákok gyakran nem teljes nevüket írják be, mert **a Seterra nem enged szóközt**! Így kreatívan kell beírniuk:
-- **Egybeírva:** `nagyanna`, `kovacspeter`
-- **CamelCase:** `NagyAnna`, `KovácsPéterIstván`
-- **Pont:** `Nagy.Anna`, `Kovacs.Peter`
+- **Egybeírva:** `vezeteknevkeresztnev`, `masikvezeteknevmasikkeresztnev`
+- **CamelCase:** `VezetéknévKeresztnév`, `VezetéknévKeresztnévMásodiknév`
+- **Pont:** `Vezetéknév.Keresztnév`, `MásikVezetéknév.MásikKeresztnév`
 
 Ez a program **intelligens algoritmussal** automatikusan megtalálja, hogy ki kicsoda, és átlátható táblázatba rendezi az eredményeket.
 
@@ -26,7 +25,7 @@ Ez a program **intelligens algoritmussal** automatikusan megtalálja, hogy ki ki
 - **Teljes név egyezés (85%)**: Egybeírt, kisbetűs nevek felismerése
 - **Vezetéknév ellenőrzés (88%)**: Ha van vezetéknév, szigorúan ellenőrzi
 - **Keresztnév párosítás (90%)**: Ha csak keresztnevet írtak be, megkeresi a megfelelő nevet
-- **CamelCase felismerés**: `NagyAnna`, `Tóth-KissEszter` automatikus szétbontása
+- **CamelCase felismerés**: `VezetéknévKeresztnév`, `Vezetéknév-KeresztnévMásodiknév` automatikus szétbontása
 - **Egyszer-használat**: Egy diák neve csak egyszer jelenik meg a táblázatban (greedy matching)
 - **Párosítatlan nevek jelzése**: Ha egy nevet nem tud párosítani, külön jelzi a táblázat alján
 - **Vesszős nevek detektálása**: Ha valaki két nevet írt be vesszővel (`név1,név2`), külön jelzi 📝
@@ -86,9 +85,9 @@ A program egy táblázatot generál:
 
 ### Diákoknak:
 A Seterra **nem enged szóközt** a nevekben! Használjátok:
-- ✅ **CamelCase:** `NagyAnna` (ajánlott!)
-- ✅ **Pont:** `Nagy.Anna`
-- ✅ **Egybeírva:** `nagyanna`
+- ✅ **CamelCase:** `VezetéknévKeresztnév` (ajánlott!)
+- ✅ **Pont:** `Vezetéknév.Keresztnév`
+- ✅ **Egybeírva:** `vezeteknevkeresztnev`
 - ❌ **NE írjatok vesszővel több nevet!** Mindenki a saját nevét írja!
 
 ### Pedagógusoknak:
@@ -125,33 +124,33 @@ A Seterra **nem enged szóközt** a nevekben! Használjátok:
 
 **Eredeti névsor:**
 ```
-Nagy Anna
-Kovács Péter István
-Tóth-Kiss Eszter
+Vezetéknév Keresztnév
+MásikVezetéknév Keresztnév Másodiknév
+Vezetéknév-Keresztnév Másodiknév
 ```
 
 **Seterra eredmények:**
 ```
-1.nagyanna100%00:15.23312/14/25
-2.KovácsPéterIstván100%00:18.45612/14/25
-3.nagyanna,kovacspeter100%00:22.11112/14/25
+1.vezeteknevkeresztnev100%00:15.23312/14/25
+2.MásikVezetéknévKeresztnévMásodiknév100%00:18.45612/14/25
+3.vezeteknevkeresztnev,masikvezeteknevmasikkeresztnev100%00:22.11112/14/25
 ```
 
 **Eredmény táblázat:**
 ```
 Névsor               | 1. lista
 ---------------------|-------------------------
-Nagy Anna            | nagyanna
-Kovács Péter István  | KovácsPéterIstván  
-Tóth-Kiss Eszter     | 
+Vezetéknév Keresztnév                    | vezeteknevkeresztnev
+MásikVezetéknév Keresztnév Másodiknév    | MásikVezetéknévKeresztnévMásodiknév
+Vezetéknév-Keresztnév Másodiknév         |
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ Párosítatlan nevek:
-                     | 📝 nagyanna,kovacspeter
+                                           | 📝 vezeteknevkeresztnev,masikvezeteknevmasikkeresztnev
 ```
 
 **Magyarázat:**
-- Nagy Anna ✅ párosult
-- Kovács Péter István ✅ párosult
+- Az első névhelyettesítő ✅ párosult
+- A második névhelyettesítő ✅ párosult
 - A 3. sorban valaki két nevet írt be vesszővel → párosítatlan, manuális javítás szükséges
 
 ## 📄 Licence
@@ -161,11 +160,9 @@ MIT License - Szabadon használható oktatási célokra.
 ---
 
 ## 🤝 Közreműködés
-Ha hibát találsz vagy új funkciót javasolnál, írj e-mailt: havassy@budai-rfg.hu.
-
+Hibajelzést vagy fejlesztési javaslatot a GitHub Issues felületén lehet rögzíteni.
 
 ---
 
-Készítette: Havassy András (földrajz tanár)
 Verzió: 9
 Utolsó frissítés: 2026. február

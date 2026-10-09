@@ -56,6 +56,38 @@
             margin-left: 10px;
         }
 
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .app-header h1,
+        .app-header .subtitle {
+            margin-bottom: 0;
+        }
+
+        .app-header .subtitle {
+            margin-top: 10px;
+        }
+
+        .btn-help {
+            flex-shrink: 0;
+            padding: 11px 17px;
+            font-size: 0.95em;
+            background: linear-gradient(135deg, #667eea 0%, #805ad5 100%);
+            color: white;
+            box-shadow: 0 6px 14px rgba(102, 126, 234, 0.28);
+            white-space: nowrap;
+        }
+
+        .btn-help:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 9px 18px rgba(102, 126, 234, 0.4);
+        }
+
         .input-section {
             margin-bottom: 30px;
         }
@@ -211,6 +243,12 @@
             font-weight: 500;
         }
 
+        .review-match {
+            color: #975a16;
+            background: #fffaf0;
+            font-weight: 600;
+        }
+
         .warning {
             background: #fef5e7;
             border-left: 4px solid #f39c12;
@@ -284,12 +322,174 @@
             font-size: 0.9em;
             margin-top: 5px;
         }
+
+        .help-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(26, 32, 44, 0.62);
+        }
+
+        .help-modal.open {
+            display: flex;
+        }
+
+        .help-dialog {
+            position: relative;
+            width: min(760px, 100%);
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 34px;
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
+            color: #2d3748;
+        }
+
+        .help-dialog h2 {
+            margin-bottom: 8px;
+            color: #2d3748;
+        }
+
+        .help-intro {
+            margin-bottom: 22px;
+            color: #4a5568;
+            line-height: 1.55;
+        }
+
+        .help-steps {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .help-step {
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        .help-step strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #4c51bf;
+        }
+
+        .help-step p,
+        .privacy-note p {
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        .privacy-note {
+            padding: 18px;
+            border-left: 4px solid #48bb78;
+            border-radius: 6px;
+            background: #f0fff4;
+        }
+
+        .privacy-note h3 {
+            margin-bottom: 7px;
+            color: #276749;
+        }
+
+        .help-small-print {
+            margin-top: 14px;
+            color: #718096;
+            font-size: 0.9em;
+            line-height: 1.45;
+        }
+
+        .btn-help-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 50%;
+            background: #edf2f7;
+            color: #4a5568;
+            font-size: 1.3em;
+            line-height: 1;
+        }
+
+        .btn-help-close:hover {
+            background: #e2e8f0;
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                padding: 24px;
+            }
+
+            .app-header {
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            .btn-help {
+                align-self: flex-start;
+            }
+
+            .help-dialog {
+                padding: 28px 22px 22px;
+            }
+
+            .help-steps {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎯 Seterra Eredmény Ellenőrző <span class="offline-badge">v9</span></h1>
-        <p class="subtitle">Seterra feladatok automatikus kiértékelése - Egybeírt nevek + false positive javítás</p>
+        <header class="app-header">
+            <div>
+                <h1>🎯 Seterra Eredmény Ellenőrző <span class="offline-badge">v9.3 teszt</span></h1>
+                <p class="subtitle">Seterra feladatok automatikus kiértékelése - szigorúbb névpárosítás, fordított névsorrend és ellenőrizendő rövidítések</p>
+            </div>
+            <button type="button" class="btn-help" onclick="openHelp()">ℹ️ Hogyan működik?</button>
+        </header>
+
+        <div id="helpModal" class="help-modal" aria-hidden="true" onclick="handleHelpOverlay(event)">
+            <section class="help-dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+                <button id="helpCloseButton" type="button" class="btn-help-close" onclick="closeHelp()" aria-label="Bezárás">×</button>
+                <h2 id="helpTitle">Hogyan működik?</h2>
+                <p class="help-intro">A program a névsor és legfeljebb három Seterra-eredménylista alapján készít összesítést. A nevek párosítását helyben, a böngészőben végzi.</p>
+
+                <div class="help-steps">
+                    <div class="help-step">
+                        <strong>1. Bemásolás</strong>
+                        <p>Írd be vagy másold be a névsort, majd a Seterra eredménylistáit.</p>
+                    </div>
+                    <div class="help-step">
+                        <strong>2. Párosítás</strong>
+                        <p>A program kezeli az ékezet nélküli, egybeírt, CamelCase és fordított sorrendű neveket is.</p>
+                    </div>
+                    <div class="help-step">
+                        <strong>3. Ellenőrzés</strong>
+                        <p>A sárga jelölés enyhébb névegyezést jelez: ezt érdemes ránézéssel ellenőrizni. A párosítatlan nevek a táblázat aljára kerülnek.</p>
+                    </div>
+                    <div class="help-step">
+                        <strong>4. Export</strong>
+                        <p>Az összesítés CSV-be vagy Excel-fájlba letölthető; az ellenőrizendő találatok az exportban is jelölve maradnak.</p>
+                    </div>
+                </div>
+
+                <div class="privacy-note">
+                    <h3>🔒 Adatvédelem</h3>
+                    <p>A névsorok és az eredmények nem kerülnek feltöltésre és nem hagyják el a számítógépedet. A feldolgozás teljesen a megnyitott böngészőben történik, ezért a fájl saját gépen, internetkapcsolat nélkül is használható.</p>
+                </div>
+                <p class="help-small-print">Az Excel-exporthoz szükséges könyvtár első betöltésekor internetkapcsolat kellhet. Ez nem küldi el a beírt neveket vagy eredményeket; CSV-export internet nélkül is készíthető.</p>
+            </section>
+        </div>
 
         <div class="input-section">
             <div class="input-group">
@@ -471,17 +671,43 @@
             if (normOriginal === normTask) {
                 return { score: 100, match: true };
             }
+
+            const origTokens = tokenize(originalName);
+
+            // Fordított, egybeírt név felismerése. Például a
+            // „KeresztnévVezetéknév” alak akkor fogadható el, ha pontosan
+            // az eredeti név fordított sorrendű, normalizált alakja.
+            // A végén legfeljebb három számjegy megengedett, mert egyes
+            // tanulók rövid számos azonosítót írnak a nevük után.
+            if (origTokens.length >= 2) {
+                const reversedFullName = normalizeString([
+                    ...origTokens.slice(1),
+                    origTokens[0]
+                ].join(''));
+
+                if (normTask === reversedFullName) {
+                    return { score: 100, match: true };
+                }
+
+                if (reversedFullName.length >= 8 &&
+                    new RegExp(`^${reversedFullName}\\d{1,3}$`).test(normTask)) {
+                    return { score: 99, match: true };
+                }
+            }
             
+            const taskInfo = detectNameParts(taskName);
+
             // TELJES NÉV HASONLÓSÁG - 85% küszöb
-            // Ez kezeli az egybeírt, kisbetűs neveket
+            // Ez csak tagolatlan neveknél érvényes. Tagolt vagy CamelCase
+            // beírásnál a vezetéknév és keresztnév külön ellenőrzése kell,
+            // különben egy rövid keresztnév tévesen elvihet másik tanulóhoz
+            // tartozó eredményt.
             const fullNameSimilarity = tokenSimilarity(originalName, taskName);
-            if (fullNameSimilarity >= 85) {
+            if (!taskInfo.hasLastName && fullNameSimilarity >= 85) {
                 return { score: fullNameSimilarity, match: true };
             }
             
             // Token-alapú párosítás
-            const taskInfo = detectNameParts(taskName);
-            const origTokens = tokenize(originalName);
             
             if (origTokens.length === 0) {
                 return { score: 0, match: false };
@@ -551,8 +777,9 @@
                     return { score: totalScore, match: true };
                 }
                 
-                // Vezetéknév egyezik, de keresztnév nem
-                return { score: 60, match: true };
+                // A puszta vezetéknév-egyezés nem elég: különben azonos
+                // vezetéknevű tanulók eredményei összecserélődhetnek.
+                return { score: 0, match: false };
             }
             
             // ESET 2: Nincs vezetéknév - csak keresztnév
@@ -575,6 +802,58 @@
                 
                 return { score: bestFirstNameScore, match: false };
             }
+        }
+
+        // Enyhébb, de továbbra is óvatos második kör. Csak akkor ad jelöltet,
+        // ha a vezetéknév teljesen egyezik, a keresztnév legalább négy betűs
+        // rövidítés, és betűileg elég közel áll a teljes keresztnévhez.
+        // A tényleges hozzárendelést a buildResultTable csak egyértelmű
+        // (egyetlen jelöltes) esetben végzi el.
+        function getLenientMatch(originalName, taskName) {
+            if (taskName.includes(',')) {
+                return { score: 0, match: false };
+            }
+
+            const taskInfo = detectNameParts(taskName);
+            const origTokens = tokenize(originalName);
+
+            if (!taskInfo.hasLastName || taskInfo.firstNames.length !== 1 || origTokens.length < 2) {
+                return { score: 0, match: false };
+            }
+
+            // Az enyhébb körben a vezetéknév csak pontos egyezéssel fogadható el.
+            if (normalizeString(origTokens[0]) !== normalizeString(taskInfo.lastName)) {
+                return { score: 0, match: false };
+            }
+
+            const shortFirstName = normalizeString(taskInfo.firstNames[0]);
+            if (shortFirstName.length < 4) {
+                return { score: 0, match: false };
+            }
+
+            let bestScore = 0;
+
+            for (let i = 1; i < origTokens.length; i++) {
+                const fullFirstName = normalizeString(origTokens[i]);
+
+                // Ez csak rövidített alakokra szolgál, nem két különböző,
+                // azonos hosszúságú név összekeverésére.
+                if (fullFirstName.length <= shortFirstName.length) {
+                    continue;
+                }
+
+                const score = tokenSimilarity(fullFirstName, shortFirstName);
+                const sameFirstThreeCharacters =
+                    fullFirstName.slice(0, 3) === shortFirstName.slice(0, 3);
+
+                if (score >= 60 || sameFirstThreeCharacters) {
+                    bestScore = Math.max(bestScore, score);
+                }
+            }
+
+            return bestScore > 0
+                ? { score: Math.max(50, bestScore), match: true }
+                : { score: 0, match: false };
         }
 
         // Seterra sor feldolgozása
@@ -692,26 +971,74 @@
                     scoreMatrix.push(row);
                 }
                 
-                // 2. LÉPÉS: Greedy matching - minden task név csak egyszer!
+                // 2. LÉPÉS: Szigorú párosítás - minden task név csak egyszer!
                 const usedTaskIndices = new Set();
-                const listResults = [];
+                const listResults = Array(originalNames.length).fill('');
+                const listReviewFlags = Array(originalNames.length).fill(false);
                 
                 for (let i = 0; i < originalNames.length; i++) {
-                    let assigned = false;
-                    
                     // Próbáljuk meg a legjobb még nem használt matchet
                     for (const candidate of scoreMatrix[i]) {
                         if (!usedTaskIndices.has(candidate.taskIndex) && candidate.match) {
-                            listResults.push(candidate.taskName);
+                            listResults[i] = candidate.taskName;
                             usedTaskIndices.add(candidate.taskIndex);
-                            assigned = true;
                             break;
                         }
                     }
-                    
-                    if (!assigned) {
-                        listResults.push('');
+                }
+
+                // 3. LÉPÉS: Enyhébb második kör, kizárólag a megmaradt neveknek.
+                // Egy Seterra-név csak akkor kap ilyen párosítást, ha pontosan
+                // egyetlen, még üres névsorhely felel meg neki. Ha egy tanulóhoz
+                // több ilyen név is illene, egyik sem kerül be automatikusan.
+                const lenientProposals = [];
+
+                for (let taskIndex = 0; taskIndex < taskList.length; taskIndex++) {
+                    if (usedTaskIndices.has(taskIndex)) {
+                        continue;
                     }
+
+                    const candidates = [];
+
+                    for (let originalIndex = 0; originalIndex < originalNames.length; originalIndex++) {
+                        const lenientResult = getLenientMatch(
+                            originalNames[originalIndex],
+                            taskList[taskIndex]
+                        );
+
+                        if (lenientResult.match) {
+                            candidates.push({ originalIndex, taskIndex });
+                        }
+                    }
+
+                    if (candidates.length === 1 && listResults[candidates[0].originalIndex] === '') {
+                        lenientProposals.push(candidates[0]);
+                    }
+                }
+
+                const proposalCountByOriginal = new Map();
+                for (const proposal of lenientProposals) {
+                    proposalCountByOriginal.set(
+                        proposal.originalIndex,
+                        (proposalCountByOriginal.get(proposal.originalIndex) || 0) + 1
+                    );
+                }
+
+                let reviewMatchCount = 0;
+                for (const proposal of lenientProposals) {
+                    if (proposalCountByOriginal.get(proposal.originalIndex) === 1) {
+                        listResults[proposal.originalIndex] = taskList[proposal.taskIndex];
+                        listReviewFlags[proposal.originalIndex] = true;
+                        usedTaskIndices.add(proposal.taskIndex);
+                        reviewMatchCount++;
+                    }
+                }
+
+                if (reviewMatchCount > 0) {
+                    warnings.push({
+                        type: 'review',
+                        message: `A ${listIndex + 1}. listában ${reviewMatchCount} név enyhébb szabállyal párosult. Ezek sárga háttérrel jelennek meg, és az exportban is „ellenőrizendő” jelölést kapnak.`
+                    });
                 }
                 
                 // Ha ez az első lista, inicializáljuk a results-ot
@@ -719,13 +1046,15 @@
                     for (let i = 0; i < originalNames.length; i++) {
                         results.push({
                             original: originalNames[i],
-                            tasks: [listResults[i]]
+                            tasks: [listResults[i]],
+                            reviewFlags: [listReviewFlags[i]]
                         });
                     }
                 } else {
                     // Hozzáadjuk a következő lista eredményeit
                     for (let i = 0; i < originalNames.length; i++) {
                         results[i].tasks.push(listResults[i]);
+                        results[i].reviewFlags.push(listReviewFlags[i]);
                     }
                 }
             }
@@ -815,15 +1144,17 @@
             for (const row of results) {
                 html += '<tr>';
                 html += `<td><strong>${row.original}</strong></td>`;
-                for (const task of row.tasks) {
+                row.tasks.forEach((task, taskIndex) => {
                     if (task === '') {
                         html += '<td style="color: #cbd5e0;">—</td>';
-                    } else if (task.includes('x')) {
+                    } else if (row.reviewFlags && row.reviewFlags[taskIndex]) {
+                        html += `<td class="review-match" title="Enyhébb névegyezés alapján párosítva; ellenőrizendő">⚠️ ${task}</td>`;
+                    } else if (/ \d+x$/.test(task)) {
                         html += `<td class="duplicate">${task}</td>`;
                     } else {
                         html += `<td class="matched">${task}</td>`;
                     }
-                }
+                });
                 html += '</tr>';
             }
             
@@ -892,9 +1223,11 @@
             
             for (let i = 0; i < listCount; i++) {
                 const completed = results.filter(r => r.tasks[i] !== '').length;
+                const reviewCount = results.filter(r => r.reviewFlags && r.reviewFlags[i]).length;
                 stats.completions.push({
                     list: i + 1,
                     count: completed,
+                    reviewCount: reviewCount,
                     percentage: Math.round((completed / results.length) * 100)
                 });
             }
@@ -913,7 +1246,7 @@
             for (const comp of stats.completions) {
                 html += `<div class="stat-card">
                     <div class="stat-number">${comp.count}</div>
-                    <div class="stat-label">${comp.list}. lista - ${comp.percentage}% teljesítette</div>
+                <div class="stat-label">${comp.list}. lista - ${comp.percentage}% teljesítette${comp.reviewCount > 0 ? ` (${comp.reviewCount} ellenőrizendő)` : ''}</div>
                 </div>`;
             }
             
@@ -964,13 +1297,16 @@
                 }
                 csvContent += escapedName;
                 
-                for (const task of row.tasks) {
-                    let escapedTask = task;
+                row.tasks.forEach((task, taskIndex) => {
+                    const exportTask = row.reviewFlags && row.reviewFlags[taskIndex]
+                        ? `⚠️ Ellenőrizendő: ${task}`
+                        : task;
+                    let escapedTask = exportTask;
                     if (escapedTask.includes(',') || escapedTask.includes('"') || escapedTask.includes('\n')) {
                         escapedTask = '"' + escapedTask.replace(/"/g, '""') + '"';
                     }
                     csvContent += ',' + (escapedTask === '' ? '' : escapedTask);
-                }
+                });
                 csvContent += '\n';
             }
             
@@ -1078,9 +1414,12 @@
             // Párosított eredmények
             for (const row of results) {
                 const rowData = [row.original];
-                for (const task of row.tasks) {
-                    rowData.push(task === '' ? null : task);  // null = tényleg üres cella
-                }
+                row.tasks.forEach((task, taskIndex) => {
+                    const exportTask = row.reviewFlags && row.reviewFlags[taskIndex]
+                        ? `⚠️ Ellenőrizendő: ${task}`
+                        : task;
+                    rowData.push(exportTask === '' ? null : exportTask);  // null = tényleg üres cella
+                });
                 data.push(rowData);
             }
             
@@ -1152,6 +1491,43 @@
             // Letöltés
             const date = new Date().toISOString().split('T')[0];
             XLSX.writeFile(wb, `seterra_eredmenyek_${date}.xlsx`);
+        }
+
+        // Rövid súgóablak
+        let helpOpener = null;
+
+        function openHelp() {
+            const modal = document.getElementById('helpModal');
+            helpOpener = document.activeElement;
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('helpCloseButton').focus();
+        }
+
+        function closeHelp() {
+            const modal = document.getElementById('helpModal');
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+
+            if (helpOpener) {
+                helpOpener.focus();
+            }
+        }
+
+        function handleHelpOverlay(event) {
+            if (event.target === event.currentTarget) {
+                closeHelp();
+            }
+        }
+
+        if (typeof document !== 'undefined') {
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && document.getElementById('helpModal').classList.contains('open')) {
+                    closeHelp();
+                }
+            });
         }
 
         // Összes törlése
