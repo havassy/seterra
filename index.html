@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seterra Eredmény Ellenőrző</title>
+    <title>Feladatlista Ellenőrző</title>
 
-    <meta name="description" content="Seterra eredményellenőrző tanároknak: hasonlítsd össze az osztálynévsort több Seterra feladat eredményével, ellenőrizd a névegyezéseket, majd exportáld az összesítést CSV- vagy Excel-fájlba.">
+    <meta name="description" content="Feladatlista-ellenőrző tanároknak: hasonlítsd össze az osztálynévsort Seterra-eredményekkel vagy egyszerű névlistákkal, majd exportáld az összesítést CSV- vagy Excel-fájlba.">
     
     <!-- SheetJS könyvtár - defer = ne blokkolja az oldal betöltését -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
@@ -94,6 +94,66 @@
 
         .input-group {
             margin-bottom: 25px;
+        }
+
+        .mode-panel {
+            margin-bottom: 25px;
+            padding: 18px;
+            border: 1px solid #dbe4ff;
+            border-radius: 10px;
+            background: #f7f9ff;
+        }
+
+        .mode-panel label {
+            margin-bottom: 7px;
+        }
+
+        .mode-panel select,
+        .task-title-input {
+            border: 2px solid #e2e8f0;
+            border-radius: 7px;
+            color: #2d3748;
+            font: inherit;
+        }
+
+        .mode-panel select {
+            width: min(360px, 100%);
+            padding: 10px 12px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .mode-panel select:focus,
+        .task-title-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .mode-description,
+        .task-title-note {
+            margin-top: 8px;
+            color: #718096;
+            font-size: 0.92em;
+            line-height: 1.45;
+        }
+
+        .task-label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .task-label-row label {
+            margin-bottom: 0;
+        }
+
+        .task-title-input {
+            width: min(320px, 100%);
+            padding: 9px 11px;
+            font-size: 0.95em;
         }
 
         label {
@@ -452,8 +512,8 @@
     <div class="container">
         <header class="app-header">
             <div>
-                <h1>🎯 Seterra Eredmény Ellenőrző <span class="offline-badge">v9.3 teszt</span></h1>
-                <p class="subtitle">Seterra feladatok automatikus kiértékelése - szigorúbb névpárosítás, fordított névsorrend és ellenőrizendő rövidítések</p>
+                <h1>🎯 Feladatlista Ellenőrző <span class="offline-badge">v11</span></h1>
+                <p class="subtitle">Seterra-eredményekhez és egyszerű névlistákhoz – óvatos, átlátható névpárosítással</p>
             </div>
             <button type="button" class="btn-help" onclick="openHelp()">ℹ️ Hogyan működik?</button>
         </header>
@@ -462,16 +522,16 @@
             <section class="help-dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
                 <button id="helpCloseButton" type="button" class="btn-help-close" onclick="closeHelp()" aria-label="Bezárás">×</button>
                 <h2 id="helpTitle">Hogyan működik?</h2>
-                <p class="help-intro">A program a névsor és legfeljebb három Seterra-eredménylista alapján készít összesítést. A nevek párosítását helyben, a böngészőben végzi.</p>
+                <p class="help-intro">A program a névsor és legfeljebb három feladatlista alapján készít összesítést. A nevek párosítását helyben, a böngészőben végzi.</p>
 
                 <div class="help-steps">
                     <div class="help-step">
                         <strong>1. Bemásolás</strong>
-                        <p>Írd be vagy másold be a névsort, majd a Seterra eredménylistáit.</p>
+                        <p>Írd be vagy másold be a névsort, majd válaszd ki: Seterra-eredményt vagy soronkénti névlistát használsz.</p>
                     </div>
                     <div class="help-step">
                         <strong>2. Párosítás</strong>
-                        <p>A program kezeli az ékezet nélküli, egybeírt, CamelCase és fordított sorrendű neveket is.</p>
+                        <p>A program kezeli az ékezet nélküli, egybeírt, CamelCase és fordított sorrendű neveket is. A feladatlisták címei opcionálisan átírhatók.</p>
                     </div>
                     <div class="help-step">
                         <strong>3. Ellenőrzés</strong>
@@ -498,19 +558,37 @@
 (Minden név külön sorba)"></textarea>
             </div>
 
+            <div class="mode-panel">
+                <label for="inputMode">A feladatlisták típusa:</label>
+                <select id="inputMode" onchange="updateInputMode()">
+                    <option value="seterra">Seterra-eredménylista</option>
+                    <option value="names">Csak nevek (soronként egy név)</option>
+                </select>
+                <p id="modeDescription" class="mode-description">Seterra módban a program a bemásolt eredménysorokból a sorszám–név–százalék formátum alapján olvassa ki a neveket. Az időeredmény megmaradhat a sorban.</p>
+            </div>
+
             <div class="input-group">
-                <label for="taskList1">📝 1. feladatlista (Seterra eredmény):</label>
+                <div class="task-label-row">
+                    <label id="taskList1Label" for="taskList1">📝 1. feladatlista (Seterra-eredmény):</label>
+                    <input id="taskTitle1" class="task-title-input" type="text" maxlength="60" placeholder="Cím (opcionális): 1. feladatlista">
+                </div>
                 <textarea id="taskList1" placeholder="Másold be ide az 1. Seterra feladat eredményeit...
 (Formátum: sorszám.Név100%idődátum)"></textarea>
             </div>
 
             <div class="input-group">
-                <label for="taskList2">📝 2. feladatlista (opcionális):</label>
+                <div class="task-label-row">
+                    <label id="taskList2Label" for="taskList2">📝 2. feladatlista (opcionális):</label>
+                    <input id="taskTitle2" class="task-title-input" type="text" maxlength="60" placeholder="Cím (opcionális): 2. feladatlista">
+                </div>
                 <textarea id="taskList2" placeholder="Hagyd üresen, ha nincs második lista..."></textarea>
             </div>
 
             <div class="input-group">
-                <label for="taskList3">📝 3. feladatlista (opcionális):</label>
+                <div class="task-label-row">
+                    <label id="taskList3Label" for="taskList3">📝 3. feladatlista (opcionális):</label>
+                    <input id="taskTitle3" class="task-title-input" type="text" maxlength="60" placeholder="Cím (opcionális): 3. feladatlista">
+                </div>
                 <textarea id="taskList3" placeholder="Hagyd üresen, ha nincs harmadik lista..."></textarea>
             </div>
 
@@ -874,8 +952,14 @@
                 .filter(line => line.length > 0);
         }
 
-        // Feladatlista feldolgozása
-        function parseTaskList(text) {
+        // Feladatlista feldolgozása. Seterra módban csak a megszokott
+        // eredménysorokból olvassa ki a nevet; névlista módban minden
+        // nem üres sor egy név.
+        function parseTaskList(text, inputMode) {
+            if (inputMode === 'names') {
+                return parseNameList(text);
+            }
+
             const lines = text.split('\n').filter(line => line.trim().length > 0);
             const names = [];
             
@@ -889,12 +973,65 @@
             return names;
         }
 
+        function getInputMode() {
+            return document.getElementById('inputMode').value;
+        }
+
+        function getTaskTitle(index) {
+            const enteredTitle = document.getElementById(`taskTitle${index + 1}`).value.trim();
+            return enteredTitle || `${index + 1}. feladatlista`;
+        }
+
+        function getTaskInputData() {
+            const inputMode = getInputMode();
+            const taskTexts = [
+                document.getElementById('taskList1').value.trim(),
+                document.getElementById('taskList2').value.trim(),
+                document.getElementById('taskList3').value.trim()
+            ];
+
+            const taskLists = [];
+            const taskTitles = [];
+
+            taskTexts.forEach((text, index) => {
+                if (text) {
+                    taskLists.push(parseTaskList(text, inputMode));
+                    taskTitles.push(getTaskTitle(index));
+                }
+            });
+
+            return { inputMode, taskTexts, taskLists, taskTitles };
+        }
+
+        function updateInputMode() {
+            const isNameListMode = getInputMode() === 'names';
+            const modeName = isNameListMode ? 'csak nevek' : 'Seterra-eredmény';
+            const modeDescription = isNameListMode
+                ? 'Minden nem üres sor egy név. A program ugyanazokkal az óvatos névegyeztetési szabályokkal hasonlítja össze a névsorral.'
+                : 'Seterra módban a program a bemásolt eredménysorokból a sorszám–név–százalék formátum alapján olvassa ki a neveket. Az időeredmény megmaradhat a sorban.';
+
+            document.getElementById('modeDescription').textContent = modeDescription;
+
+            for (let index = 0; index < 3; index++) {
+                const number = index + 1;
+                const suffix = number === 1 ? '' : ' (opcionális)';
+                document.getElementById(`taskList${number}Label`).textContent =
+                    `📝 ${number}. feladatlista${suffix} (${modeName})`;
+
+                const textArea = document.getElementById(`taskList${number}`);
+                textArea.placeholder = isNameListMode
+                    ? `Másold be ide a ${number}. feladatlista neveit...\n(Minden név külön sorba)`
+                    : number === 1
+                        ? 'Másold be ide az 1. Seterra feladat eredményeit...\n(Formátum: sorszám.Név100%idődátum)'
+                        : `Hagyd üresen, ha nincs ${number}. lista...`;
+            }
+        }
+
         // Adatok feldolgozása
         function processData() {
             const originalText = document.getElementById('originalList').value.trim();
-            const task1Text = document.getElementById('taskList1').value.trim();
-            const task2Text = document.getElementById('taskList2').value.trim();
-            const task3Text = document.getElementById('taskList3').value.trim();
+            const taskData = getTaskInputData();
+            const task1Text = taskData.taskTexts[0];
             
             if (!originalText || !task1Text) {
                 alert('⚠️ Kérlek töltsd ki az eredeti névsort és legalább az 1. feladatlistát!');
@@ -909,14 +1046,14 @@
             setTimeout(() => {
                 try {
                     const originalNames = parseNameList(originalText);
-                    const taskLists = [];
+                    const { inputMode, taskLists, taskTitles } = taskData;
+
+                    if (inputMode === 'seterra' && taskLists.some(list => list.length === 0)) {
+                        throw new Error('Az egyik Seterra-listából nem sikerült eredménysort kiolvasni. Ellenőrizd, hogy a sorok tartalmaznak-e sorszámot és százalékjelet, vagy válaszd a „Csak nevek” módot.');
+                    }
                     
-                    if (task1Text) taskLists.push(parseTaskList(task1Text));
-                    if (task2Text) taskLists.push(parseTaskList(task2Text));
-                    if (task3Text) taskLists.push(parseTaskList(task3Text));
-                    
-                    const results = buildResultTable(originalNames, taskLists);
-                    displayResults(results, originalNames, taskLists);
+                    const results = buildResultTable(originalNames, taskLists, taskTitles);
+                    displayResults(results, originalNames, taskLists, taskTitles);
                 } catch (error) {
                     alert('❌ Hiba történt a feldolgozás során: ' + error.message);
                     console.error(error);
@@ -927,7 +1064,7 @@
         }
 
         // Eredmény táblázat építése - ÚJ ALGORITMUS
-        function buildResultTable(originalNames, taskLists) {
+        function buildResultTable(originalNames, taskLists, taskTitles = []) {
             const results = [];
             const warnings = [];
             
@@ -1037,7 +1174,7 @@
                 if (reviewMatchCount > 0) {
                     warnings.push({
                         type: 'review',
-                        message: `A ${listIndex + 1}. listában ${reviewMatchCount} név enyhébb szabállyal párosult. Ezek sárga háttérrel jelennek meg, és az exportban is „ellenőrizendő” jelölést kapnak.`
+                        message: `A „${taskTitles[listIndex] || `${listIndex + 1}. feladatlista`}” listában ${reviewMatchCount} név enyhébb szabállyal párosult. Ezek sárga háttérrel jelennek meg, és az exportban is „ellenőrizendő” jelölést kapnak.`
                     });
                 }
                 
@@ -1121,11 +1258,11 @@
         }
 
         // Eredmények megjelenítése
-        function displayResults(data, originalNames, taskLists) {
+        function displayResults(data, originalNames, taskLists, taskTitles) {
             const { results, warnings, unmatchedTasks } = data;
             
             // Statisztikák
-            const stats = calculateStats(results, taskLists.length);
+            const stats = calculateStats(results, taskLists.length, taskTitles);
             displayStats(stats);
             
             // Figyelmeztetések
@@ -1137,7 +1274,7 @@
             let html = '<table><thead><tr>';
             html += '<th>Névsor</th>';
             for (let i = 0; i < taskLists.length; i++) {
-                html += `<th>${i + 1}. lista</th>`;
+                html += `<th>${escapeHtml(taskTitles[i] || `${i + 1}. feladatlista`)}</th>`;
             }
             html += '</tr></thead><tbody>';
             
@@ -1215,7 +1352,7 @@
         }
 
         // Statisztikák számítása
-        function calculateStats(results, listCount) {
+        function calculateStats(results, listCount, taskTitles = []) {
             const stats = {
                 totalStudents: results.length,
                 completions: []
@@ -1225,7 +1362,7 @@
                 const completed = results.filter(r => r.tasks[i] !== '').length;
                 const reviewCount = results.filter(r => r.reviewFlags && r.reviewFlags[i]).length;
                 stats.completions.push({
-                    list: i + 1,
+                    title: taskTitles[i] || `${i + 1}. feladatlista`,
                     count: completed,
                     reviewCount: reviewCount,
                     percentage: Math.round((completed / results.length) * 100)
@@ -1246,7 +1383,7 @@
             for (const comp of stats.completions) {
                 html += `<div class="stat-card">
                     <div class="stat-number">${comp.count}</div>
-                <div class="stat-label">${comp.list}. lista - ${comp.percentage}% teljesítette${comp.reviewCount > 0 ? ` (${comp.reviewCount} ellenőrizendő)` : ''}</div>
+                <div class="stat-label">${escapeHtml(comp.title)} – ${comp.percentage}% teljesítette${comp.reviewCount > 0 ? ` (${comp.reviewCount} ellenőrizendő)` : ''}</div>
                 </div>`;
             }
             
@@ -1266,26 +1403,35 @@
             document.getElementById('warningsContainer').innerHTML = html;
         }
 
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function escapeCsvValue(value) {
+            const text = String(value);
+            return text.includes(',') || text.includes('"') || text.includes('\n')
+                ? '"' + text.replace(/"/g, '""') + '"'
+                : text;
+        }
+
         // CSV export
         function exportToCSV() {
             const originalText = document.getElementById('originalList').value.trim();
-            const task1Text = document.getElementById('taskList1').value.trim();
-            const task2Text = document.getElementById('taskList2').value.trim();
-            const task3Text = document.getElementById('taskList3').value.trim();
             
             const originalNames = parseNameList(originalText);
-            const taskLists = [];
+            const { taskLists, taskTitles } = getTaskInputData();
             
-            if (task1Text) taskLists.push(parseTaskList(task1Text));
-            if (task2Text) taskLists.push(parseTaskList(task2Text));
-            if (task3Text) taskLists.push(parseTaskList(task3Text));
-            
-            const { results, unmatchedTasks } = buildResultTable(originalNames, taskLists);
+            const { results, unmatchedTasks } = buildResultTable(originalNames, taskLists, taskTitles);
             
             // CSV fejléc
             let csvContent = 'Névsor';
             for (let i = 0; i < taskLists.length; i++) {
-                csvContent += `,${i + 1}. lista`;
+                csvContent += `,${escapeCsvValue(taskTitles[i] || `${i + 1}. feladatlista`)}`;
             }
             csvContent += '\n';
             
@@ -1372,7 +1518,7 @@
             const url = URL.createObjectURL(blob);
             const date = new Date().toISOString().split('T')[0];
             link.setAttribute('href', url);
-            link.setAttribute('download', `seterra_eredmenyek_${date}.csv`);
+            link.setAttribute('download', `feladatlista_ellenorzes_${date}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
@@ -1388,18 +1534,11 @@
             }
             
             const originalText = document.getElementById('originalList').value.trim();
-            const task1Text = document.getElementById('taskList1').value.trim();
-            const task2Text = document.getElementById('taskList2').value.trim();
-            const task3Text = document.getElementById('taskList3').value.trim();
             
             const originalNames = parseNameList(originalText);
-            const taskLists = [];
+            const { taskLists, taskTitles } = getTaskInputData();
             
-            if (task1Text) taskLists.push(parseTaskList(task1Text));
-            if (task2Text) taskLists.push(parseTaskList(task2Text));
-            if (task3Text) taskLists.push(parseTaskList(task3Text));
-            
-            const { results, unmatchedTasks } = buildResultTable(originalNames, taskLists);
+            const { results, unmatchedTasks } = buildResultTable(originalNames, taskLists, taskTitles);
             
             // Excel adatok előkészítése - MINDEN KÜLÖN SORBAN
             const data = [];
@@ -1407,7 +1546,7 @@
             // Fejléc
             const header = ['Névsor'];
             for (let i = 0; i < taskLists.length; i++) {
-                header.push(`${i + 1}. lista`);
+                header.push(taskTitles[i] || `${i + 1}. feladatlista`);
             }
             data.push(header);
             
@@ -1490,7 +1629,7 @@
             
             // Letöltés
             const date = new Date().toISOString().split('T')[0];
-            XLSX.writeFile(wb, `seterra_eredmenyek_${date}.xlsx`);
+            XLSX.writeFile(wb, `feladatlista_ellenorzes_${date}.xlsx`);
         }
 
         // Rövid súgóablak
@@ -1537,8 +1676,18 @@
                 document.getElementById('taskList1').value = '';
                 document.getElementById('taskList2').value = '';
                 document.getElementById('taskList3').value = '';
+                document.getElementById('taskTitle1').value = '';
+                document.getElementById('taskTitle2').value = '';
+                document.getElementById('taskTitle3').value = '';
+                document.getElementById('inputMode').value = 'seterra';
+                updateInputMode();
                 document.getElementById('results').style.display = 'none';
             }
+        }
+
+        // Az alapértelmezett Seterra-mód szövegeinek beállítása oldalbetöltéskor.
+        if (typeof document !== 'undefined') {
+            updateInputMode();
         }
     </script>
 </body>
