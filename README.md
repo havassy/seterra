@@ -1,168 +1,129 @@
-# Seterra Eredmény Ellenőrző
+# Feladatlista Ellenőrző
+
+Egyetlen HTML-fájlból álló, **általános névlista-egyeztető** segédprogram pedagógusoknak. Egy eredeti névsort legfeljebb három másik névlistával hasonlít össze, és az eredményt táblázatban, CSV-ben vagy Excel-fájlban adja vissza. A Seterra-eredmények beolvasása ennek egyik külön támogatott módja.
+
 Az útmutató kizárólag semleges névhelyettesítőket használ.
 
-## 📋 Miről szól ez a program?
+> ## 🔒 Adatvédelem és GDPR
+>
+> A beírt névsorok és feladatlisták feldolgozása **helyben, a megnyitott böngészőben** történik. A program a neveket és az eredményeket **nem tölti fel, nem küldi el külső szolgáltatásnak**, és nem tárolja szerveren.
+>
+> Ez a megoldás különösen kedvező adatvédelmi szempontból: nincs külső adatfeldolgozó, ahová a tanulói nevek átkerülnének. A helyi feldolgozás a GDPR szerinti *beépített és alapértelmezett adatvédelem* elvével összhangban áll ([GDPR, 25. cikk](https://eur-lex.europa.eu/legal-content/HU/TXT/?uri=CELEX:32016R0679)).
+>
+> A teljes intézményi GDPR-megfelelésért ugyanakkor mindig az adatkezelő intézmény felel: például a célhoz kötött használatért, a szükséges hozzáférési és megőrzési szabályokért ([EDPB útmutató](https://www.edpb.europa.eu/sme/be-compliant/be-compliant_en)).
 
-Ez egy **offline, webes alkalmazás** pedagógusok számára, amely automatikusan párosítja az osztálynévsor neveit a Seterra földrajzi vetélkedő eredményeivel.
+## Mire használható?
 
-## 🎯 Mi a célja?
+Kétféle bemenet közül lehet választani.
 
-A Seterra játékban a diákok gyakran nem teljes nevüket írják be, mert **a Seterra nem enged szóközt**! Így kreatívan kell beírniuk:
-- **Egybeírva:** `vezeteknevkeresztnev`, `masikvezeteknevmasikkeresztnev`
-- **CamelCase:** `VezetéknévKeresztnév`, `VezetéknévKeresztnévMásodiknév`
-- **Pont:** `Vezetéknév.Keresztnév`, `MásikVezetéknév.MásikKeresztnév`
+| Mód | Mit kell bemásolni? | Mire jó? |
+| --- | --- | --- |
+| **Csak nevek** | Soronként egy nevet | Bármely feladat, jelenléti lista, leadási lista vagy online gyakorlófelület névlistájának ellenőrzésére. |
+| **Seterra-eredménylista** | A Seterra-ból kimásolt eredménysorokat | A program a sorszám–név–százalék formátum alapján kiolvassa és párosítja a neveket. Az időeredmény maradhat a sorban. |
 
-Ez a program **intelligens algoritmussal** automatikusan megtalálja, hogy ki kicsoda, és átlátható táblázatba rendezi az eredményeket.
+Mindkét módban megadható az eredeti névsor és legfeljebb három lista. Az egyes listák címe opcionálisan átírható; ha üresen marad, az eredményben **1. feladatlista**, **2. feladatlista**, illetve **3. feladatlista** jelenik meg.
 
-## ⚙️ Hogyan működik?
+## Használat
 
-1. **Bemenet**: Bemásolod az osztálynévsort és a Seterra eredménylistát (1-3 lista)
-2. **Feldolgozás**: A program intelligens név-párosítással összepárosítja őket
-3. **Kimenet**: Táblázat formában látod az eredményeket
-4. **Export**: Letöltheted Excel (XLSX) vagy CSV formátumban
+1. Töltsd le az `index.html` fájlt a számítógépedre.
+2. Nyisd meg bármely modern böngészőben (Chrome, Edge, Firefox vagy Safari). Nem kell telepíteni semmit.
+3. Másold be az eredeti névsort; minden név külön sorba kerüljön.
+4. Válaszd ki a feladatlisták típusát.
+5. Másold be az első, szükség esetén a második és harmadik listát is.
+6. Ha szeretnéd, add meg a listák saját címét, például „Vaktérkép” vagy „Jelenlét”.
+7. Kattints a **„Táblázat készítése”** gombra.
+8. Ellenőrzés után töltsd le az eredményt CSV- vagy XLSX-formátumban.
 
-### Intelligens párosítás
-- **Teljes név egyezés (85%)**: Egybeírt, kisbetűs nevek felismerése
-- **Vezetéknév ellenőrzés (88%)**: Ha van vezetéknév, szigorúan ellenőrzi
-- **Keresztnév párosítás (90%)**: Ha csak keresztnevet írtak be, megkeresi a megfelelő nevet
-- **CamelCase felismerés**: `VezetéknévKeresztnév`, `Vezetéknév-KeresztnévMásodiknév` automatikus szétbontása
-- **Egyszer-használat**: Egy diák neve csak egyszer jelenik meg a táblázatban (greedy matching)
-- **Párosítatlan nevek jelzése**: Ha egy nevet nem tud párosítani, külön jelzi a táblázat alján
-- **Vesszős nevek detektálása**: Ha valaki két nevet írt be vesszővel (`név1,név2`), külön jelzi 📝
+A jobb felső **„ℹ️ Hogyan működik?”** gomb rövid beépített útmutatót is ad.
 
-## 🔒 Adatvédelem
+## Saját gépen, internet nélkül
 
-- ✅ **100% offline működés** - Első megnyitás után internet NEM szükséges (SheetJS cache-elődik)
-- ✅ **Nincs adatküldés** - Az adatok NEM hagyják el a gépet
-- ✅ **Teljes adatbiztonság** - Minden a böngésződben fut lokálisan
-- ✅ **GDPR-kompatibilis** - Személyes adatok teljes kontrollja
+A programot a letöltött HTML-fájl közvetlen megnyitásával, saját gépen lehet használni.
 
-## 🚀 Használat
+- A névfeldolgozás, a párosítás, a táblázatkészítés és a **CSV-export internet nélkül is működik**.
+- Az **Excel (XLSX) exporthoz** a SheetJS könyvtárra van szükség, amelyet a program külső címről tölt be. Ha nincs kapcsolat – vagy a böngésző nem őrizte meg gyorsítótárban –, az XLSX-export nem érhető el, de a CSV-export változatlanul használható.
+- A könyvtár letöltésekor sem kerülnek elküldésre a bemásolt nevek vagy eredmények; a böngésző csak magát a programkönyvtárat kéri le.
 
-### Első használat (internettel):
-1. Töltsd le a `seterra-ellenorzo.html` fájlt
-2. Nyisd meg **internetkapcsolattal** először (SheetJS könyvtár betöltődik)
-3. A böngésző cache-eli → **utána offline is használható**!
+## Névfelismerés
 
-### További használat (offline is működik):
-1. Nyisd meg bármely modern böngészőben (Chrome, Firefox, Edge, Safari)
-2. Másold be az eredeti osztálynévsort (minden név külön sorba)
-3. Másold be a Seterra eredményeket (1-3 feladatlista)
-4. Kattints a "Táblázat készítése" gombra
-5. Letöltheted az eredményt XLSX vagy CSV formátumban
+A program a következő gyakori alakokat kezeli:
 
-## 📥 Export opciók
+- ékezet nélküli és kisbetűs beírás;
+- egybeírt név, például `vezeteknevkeresztnev`;
+- CamelCase alak, például `VezetéknévKeresztnév`;
+- ponttal vagy szóközzel tagolt alak, például `Vezetéknév.Keresztnév`;
+- fordított sorrendű, egybeírt név, például `KeresztnévVezetéknév`;
+- a fordított alak végén rövid számos azonosító is megengedett.
 
-### Excel (XLSX) - Ajánlott! ⭐
-- ✅ Valódi Excel fájl (.xlsx)
-- ✅ **Minden külön sorban** → húzható az Excel-ben!
-- ✅ Üres cellák helyesen kezelve (nincs "lecseréli éket?" figyelmeztetés)
-- ✅ Formázás megmarad
-- ⚠️ **Első használathoz internetkapcsolat szükséges** (SheetJS betöltése)
+Az algoritmus szándékosan óvatos: a csendben hibás párosítás kockázatát csökkenti.
 
-**Használat Excel-ben:**
-1. Megnyitod a letöltött .xlsx fájlt
-2. Párosítatlan név megfogása
-3. Húzod a megfelelő eredeti név mellé
-4. Kész! Nincs felesleges figyelmeztetés!
+- Azonos vezetéknevű, de eltérő keresztnevű személyeket nem párosít össze pusztán a vezetéknév alapján.
+- Egy bemeneti név egy listán belül csak egyszer használható fel.
+- A vesszővel elválasztott, több személyre utaló beírásokat nem párosítja automatikusan.
+- Egyes egyértelmű, rövidített keresztnevek sárga **⚠️ ellenőrizendő** jelöléssel kaphatnak párosítást. Ezeket érdemes ránézéssel ellenőrizni.
+- A nem párosított nevek a táblázat alján jelennek meg, így Excelben néhány mozdulattal javíthatók.
 
-### CSV - Mindig működik!
-- ✅ Mindig működik (internetkapcsolat nélkül is)
-- ✅ Excel-ben is megnyitható
-- ✅ UTF-8 BOM támogatás (magyar ékezetek)
-- ⚠️ Kézzel kell javítani az üres cellákat
+## Csak nevek mód – általános használat
 
-## 📊 Kimenet
+Ebben a módban minden nem üres sor egy név; nincs szükség sorszámra, százalékra vagy időeredményre.
 
-A program egy táblázatot generál:
-- **Első oszlop**: Eredeti osztálynévsor
-- **További oszlopok**: 1-3 feladatlista eredményei
-- **Párosítatlan nevek**: A táblázat alján, piros háttérrel jelezve
-  - 📝 **ikon**: Vesszős név (két diák együtt írta be)
-  - Egyéb: Túl nagy eltérés, kézzel javítható
-
-## 💡 Tippek
-
-### Diákoknak:
-A Seterra **nem enged szóközt** a nevekben! Használjátok:
-- ✅ **CamelCase:** `VezetéknévKeresztnév` (ajánlott!)
-- ✅ **Pont:** `Vezetéknév.Keresztnév`
-- ✅ **Egybeírva:** `vezeteknevkeresztnev`
-- ❌ **NE írjatok vesszővel több nevet!** Mindenki a saját nevét írja!
-
-### Pedagógusoknak:
-- Ha egy név nem párosul automatikusan (< 85% egyezés), a táblázat alján megjelenik
-- A duplikált nevek "2x", "3x" jelöléssel vannak ellátva
-- Az XLSX fájl megnyitható Excel-ben és Google Sheets-ben is
-- Ha vesszős nevet látsz (📝), az azt jelenti, hogy két diák együtt írta be a nevét
-
-## 🛠️ Technikai részletek
-
-- Tiszta HTML + JavaScript (vanilla JS)
-- SheetJS (XLSX könyvtár) - CDN-ről, defer attribútummal
-- Fuzzy string matching (Levenshtein distance)
-- Fájlméret: ~43 KB (+ ~700 KB SheetJS cache első használatkor)
-- Kompatibilis: Minden modern böngésző
-
-## 🔧 Párosítási algoritmus
-
-```
-1. Vesszős név? → PÁROSÍTATLAN (📝 jelzéssel)
-   ↓
-2. 100% normalizált egyezés? → PÁROSUL
-   ↓
-3. 85% teljes név hasonlóság? → PÁROSUL
-   ↓
-4. Van vezetéknév?
-   ├─ IGEN: Vezetéknév 88% + keresztnév 85% → PÁROSUL
-   └─ NEM: Csak keresztnév 90% → PÁROSUL
-   ↓
-5. Semmi nem egyezik → PÁROSÍTATLAN
+```text
+VezetéknévKeresztnév
+Másik Vezetéknév
+KeresztnévVezetéknév
 ```
 
-## 📄 Példa használat
+Használható például egy feladatot leadók, egy jelenléti lista vagy egy online gyakorlófelület névlistájának összevetésére.
 
-**Eredeti névsor:**
-```
-Vezetéknév Keresztnév
-MásikVezetéknév Keresztnév Másodiknév
-Vezetéknév-Keresztnév Másodiknév
-```
+## Seterra-eredménylista mód – külön támogatott formátum
 
-**Seterra eredmények:**
-```
-1.vezeteknevkeresztnev100%00:15.23312/14/25
-2.MásikVezetéknévKeresztnévMásodiknév100%00:18.45612/14/25
-3.vezeteknevkeresztnev,masikvezeteknevmasikkeresztnev100%00:22.11112/14/25
+A Seterra nem enged szóközt a névben, ezért a tanulók többféleképpen írhatják be azt. A program a névsorhoz próbálja igazítani ezeket az alakokat.
+
+```text
+1.vezeteknevkeresztnev100%00:15
+2.VezetéknévKeresztnév95%00:18
+3.Vezetéknév.Keresztnév90%00:22
 ```
 
-**Eredmény táblázat:**
-```
-Névsor               | 1. lista
----------------------|-------------------------
-Vezetéknév Keresztnév                    | vezeteknevkeresztnev
-MásikVezetéknév Keresztnév Másodiknév    | MásikVezetéknévKeresztnévMásodiknév
-Vezetéknév-Keresztnév Másodiknév         |
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Párosítatlan nevek:
-                                           | 📝 vezeteknevkeresztnev,masikvezeteknevmasikkeresztnev
-```
+A program a sorszám és a százalék közötti névrészt használja a párosításhoz. Ha egy bemásolt lista nem ilyen eredménysorokat tartalmaz, válts **„Csak nevek”** módra.
 
-**Magyarázat:**
-- Az első névhelyettesítő ✅ párosult
-- A második névhelyettesítő ✅ párosult
-- A 3. sorban valaki két nevet írt be vesszővel → párosítatlan, manuális javítás szükséges
+## Eredmény és export
 
-## 📄 Licence
+A táblázat első oszlopa az eredeti névsor. A további oszlopok a megadott feladatlisták. A címsorok a megadott saját címeket, vagy azok hiányában az alapértelmezett feladatlistasorszámot mutatják.
 
-MIT License - Szabadon használható oktatási célokra.
+| Jelölés | Jelentés |
+| --- | --- |
+| Zöld név | automatikus párosítás |
+| Sárga `⚠️` | enyhébb szabállyal párosított, ellenőrizendő név |
+| Piros rész a táblázat alján | párosítatlan bemeneti név |
+| `📝` | vesszővel elválasztott, több személyre utaló beírás |
+| `2x`, `3x` | ugyanaz a név többször szerepel a bemeneti listában |
+
+### CSV
+
+- internet nélkül is elkészül;
+- Excelben és más táblázatkezelőkben megnyitható;
+- kezeli a magyar ékezeteket.
+
+### Excel (XLSX)
+
+- valódi `.xlsx` fájlt készít;
+- az üres cellákat üresen hagyja;
+- az ellenőrizendő párosításokat az exportban is jelöli;
+- internetkapcsolat vagy meglévő böngésző-gyorsítótár szükséges hozzá.
+
+## Technikai tudnivalók
+
+- Egyetlen HTML-fájl, tiszta HTML, CSS és JavaScript.
+- Nincs saját szerver, felhasználói fiók vagy adatbázis.
+- A névegyeztetés Levenshtein-távolságon alapuló, szabályokkal kiegészített hasonlóságvizsgálat.
+- Az XLSX-export a SheetJS könyvtárat használja.
+
+## Közreműködés
+
+Hibajelzés vagy fejlesztési javaslat a GitHub Issues felületén rögzíthető.
 
 ---
 
-## 🤝 Közreműködés
-Hibajelzést vagy fejlesztési javaslatot a GitHub Issues felületén lehet rögzíteni.
-
----
-
-Verzió: 9
-Utolsó frissítés: 2026. február
+**Verzió:** 11
+**Utolsó frissítés:** 2026. október
